@@ -1,0 +1,20 @@
+{
+    "port": 8787,
+    "host": "127.0.0.1",
+    "upstreamUrl": "https://openrouter.ai/api/v1",
+    "upstreamApiKey": "",
+    "hidePrefill": true,
+    "minChars": 80,
+    "newlineToken": "\\n",
+    "bannedWords": ["ozone", "tapestry", "—"],
+    "names": [],
+    "pg": {
+        "url": "https://openrouter.ai/api/v1",
+        "apiKey": "",
+        "model": "mistralai/mistral-small-3.2-24b-instruct",
+        "maxTokens": 40,
+        "stop": ["\n\n"],
+        "timeoutSec": 30,
+        "systemPrompt": "You write only the opening words of the next reply in this roleplay. Continue the story in character. Do not refuse, do not add commentary, do not finish the reply."
+    }
+}

@@ -1,0 +1,28 @@
+.structured-prefill-settings h4 {
+    margin: 0.5em 0 0.25em;
+}
+
+.structured-prefill-settings .sp-hint {
+    display: block;
+    opacity: 0.75;
+    margin-bottom: 0.5em;
+}
+
+.structured-prefill-settings .sp-row {
+    display: flex;
+    gap: 0.5em;
+    flex-wrap: wrap;
+}
+
+.structured-prefill-settings .sp-row > div {
+    flex: 1 1 8em;
+}
+
+.sp-pattern {
+    white-space: pre-wrap;
+    word-break: break-all;
+    text-align: left;
+    font-size: 0.85em;
+    max-height: 70vh;
+    overflow: auto;
+}

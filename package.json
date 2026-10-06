@@ -1,0 +1,14 @@
+{
+    "name": "structured-prefill",
+    "version": "1.0.0",
+    "description": "SillyTavern extension: force the start of AI replies through JSON Schema structured outputs.",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "test": "node tests/antislop.test.mjs && node tests/template.test.mjs && node tests/output.test.mjs && node tests/integration.test.mjs",
+        "proxy": "node proxy/server.mjs"
+    },
+    "engines": {
+        "node": ">=18"
+    }
+}
