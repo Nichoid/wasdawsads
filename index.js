@@ -35,6 +35,7 @@ const DEFAULT_SETTINGS = Object.freeze({
     overlapChars: 40,
     continueNudge: '[Continue your previous reply from exactly where it stopped. Do not restart it.]',
     bannedWords: '',
+    prefill: '',
     pgProfileId: '',
     pgMaxTokens: 40,
     pgStopStrings: '',
@@ -216,10 +217,19 @@ async function onChatCompletionSettingsReady(data) {
             let prefill = null;
             if (last?.role === 'assistant') {
                 const text = contentToText(last.content);
-                if (!isHistoryMessage(text)) prefill = text;
+                if (!isHistoryMessage(text)) {
+                    // A prompt-level prefill is always removed: providers without prefill support reject it.
+                    prefill = text;
+                    data.messages.pop();
+                }
+            }
+            // The Prefill box in the settings takes priority over a prompt-level prefill.
+            const boxPrefill = String(s.prefill ?? '');
+            if (boxPrefill.trim()) {
+                const c = ctx();
+                prefill = c.substituteParams ? c.substituteParams(boxPrefill) : boxPrefill;
             }
             if (prefill === null && banned.length === 0) return;
-            if (prefill !== null) data.messages.pop();
 
             let parts = parseTemplate(prefill ?? '');
             if (hasStub(parts, 'pg')) {
@@ -340,6 +350,10 @@ const SETTINGS_HTML = `
         <span>Hide the prefill text in the final message</span>
       </label>
       <small class="sp-hint">Display only. Put <code>[[keep]]</code> in the prefill to hide only what comes before it.</small>
+
+      <label for="sp_prefill"><b>Prefill</b></label>
+      <textarea id="sp_prefill" class="text_pole textarea_compact" rows="6" placeholder="Text the reply must start with. Macros like {{char}} and stubs like [[keep]], [[pg]], [[w:2-5]] work here."></textarea>
+      <small class="sp-hint">Leave empty to use a final assistant message from your prompt (Prompt Manager) instead. Not used for Continue.</small>
 
       <hr class="sysHR" />
       <h4>Schema</h4>
@@ -474,6 +488,7 @@ function renderSettings() {
 
     bindCheckbox('sp_enabled', 'enabled');
     bindCheckbox('sp_hide_prefill', 'hidePrefill');
+    bindText('sp_prefill', 'prefill');
     bindNumber('sp_min_chars', 'minChars');
     bindText('sp_newline_token', 'newlineToken');
     bindNumber('sp_overlap_chars', 'overlapChars');
@@ -499,8 +514,8 @@ function renderSettings() {
     });
 
     document.getElementById('sp_reset').addEventListener('click', () => {
-        const profile = settings().pgProfileId;
-        ctx().extensionSettings[MODULE] = { ...DEFAULT_SETTINGS, pgProfileId: profile };
+        const { pgProfileId, prefill } = settings();
+        ctx().extensionSettings[MODULE] = { ...DEFAULT_SETTINGS, pgProfileId, prefill };
         save();
         document.getElementById('structured_prefill_settings')?.remove();
         renderSettings();

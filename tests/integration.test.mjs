@@ -147,4 +147,22 @@ async function sendLikeST(data) {
     assert.ok(!re.test('The air smelled of ozone and something else entirely, like a storm.'));
     assert.strictEqual(out, nextReply);
 }
+// 8. Prefill box in the settings, with macros, overrides a prompt-level prefill.
+{
+    extensionSettings.structuredPrefill.bannedWords = '';
+    extensionSettings.structuredPrefill.prefill = '{{char}} smiled';
+    const realCtx = globalThis.SillyTavern.getContext;
+    globalThis.SillyTavern.getContext = () => ({ ...realCtx(), substituteParams: (t) => t.replace('{{char}}', 'Mira') });
+    const data = {
+        type: 'normal', stream: true, chat_completion_source: 'openrouter',
+        messages: [{ role: 'user', content: 'Hello' }, { role: 'assistant', content: 'Prompt manager prefill' }],
+    };
+    nextReply = 'Mira smiled and handed over the letter without a word, then turned back toward the crowded harbour.';
+    const out = await sendLikeST(data);
+    globalThis.SillyTavern.getContext = realCtx;
+    assert.strictEqual(lastBackendBody.messages.length, 1, 'prompt-level prefill still removed');
+    assert.ok(lastBackendBody.json_schema.value.properties.value.pattern.startsWith('^Mira smiled'));
+    assert.strictEqual(out, 'and handed over the letter without a word, then turned back toward the crowded harbour.');
+    extensionSettings.structuredPrefill.prefill = '';
+}
 console.log('integration ok');

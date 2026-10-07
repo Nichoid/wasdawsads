@@ -7,7 +7,9 @@ A SillyTavern extension that forces the start of the AI's reply through JSON Sch
 1. In SillyTavern open **Extensions** > **Install extension**.
 2. Paste this repository's URL and install.
 3. Open the **StructuredPrefill** drawer in the extensions panel and check that it is enabled.
-4. Add a final **assistant** message to your prompt (Prompt Manager, role Assistant, placed after Chat History). That message is your prefill.
+4. Type your prefill into the **Prefill** box in the StructuredPrefill drawer. Macros such as `{{char}}` and all `[[...]]` stubs work there.
+
+   Alternatively, leave the box empty and add a final **assistant** message to your prompt (Prompt Manager, role Assistant, placed after Chat History). If both are set, the Prefill box wins.
 
 Requires a SillyTavern version with Connection Manager and the `CHAT_COMPLETION_SETTINGS_READY` event (1.12.x or newer). `[[pg]]` needs the built-in Connection Manager extension enabled.
 
@@ -72,6 +74,9 @@ The model generates the prefix itself to satisfy the schema constraint. There is
 ***
 
 #### EXTENSION SETTINGS
+
+**Prefill**
+The text the reply must start with. You can also use a final assistant message in your prompt instead, see INSTALL above.
 
 ![](https://desu-usergeneratedcontent.xyz/g/image/1774/82/1774821134008.png)
 
@@ -302,7 +307,7 @@ If your provider does not support it, StructuredPrefill does nothing. Your promp
 
 - **Supported sources.** The extension activates for the SillyTavern chat completion sources whose backend forwards `json_schema` as an OpenAI-style `response_format`: OpenAI, OpenRouter, Custom (OpenAI-compatible), Mistral, Groq, Fireworks, xAI, AI/ML API, Electron Hub, Chutes, NanoGPT, CometAPI, Azure OpenAI, Perplexity and Pollinations. On any other source it does nothing. The settings drawer shows whether the current source is supported.
 - **Which generations.** Normal sends, regenerates, swipes and Continue are handled. Quiet generations (summaries, other extensions) and Impersonate are left alone.
-- **Prefill detection.** The prefill is the final assistant message of the outgoing prompt. If that message is just the last chat message (for example when you send with an empty input box), it is not treated as a prefill.
+- **Prefill detection.** The Prefill box in the settings is used when it is not empty. Otherwise the prefill is the final assistant message of the outgoing prompt. If that message is just the last chat message (for example when you send with an empty input box), it is not treated as a prefill.
 - **No prefill.** If there is no prefill but banned words are set, the schema still applies with an empty prefix so the anti-slop filter and the minimum length work on every reply.
 - **Continue.** The last *Overlap* characters of the message must be re-written by the model and are stripped again before display. If the prompt ends on an assistant message, the *Continue nudge* is added as a user message so providers without prefill support accept the request. If SillyTavern's Continue postfix already inserted a space, leading whitespace of the continuation is dropped. Continuing in the middle of a word with the postfix set to a space will still produce a space there.
 - **Anti-slop pattern size.** An exact "does not contain any of these words" regex grows exponentially with the number of words, so the extension builds it with a bounded tracking depth that it picks automatically to stay under about 8,000 characters. Banned words are always blocked in normal text. The only way one can slip through is when it is glued directly onto fragments of other banned words, for example `toozone` when banning both `tapestry` and `ozone` with a small budget. Any text the pattern rejects really does contain a banned word.
